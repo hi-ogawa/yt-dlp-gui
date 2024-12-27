@@ -18,7 +18,7 @@ interface VideoFormatInfo {
 export function App() {
 	const form = createTinyForm(
 		React.useState({
-			tmpId: "n-m0fh0mZXA",
+			tmpId: "https://www.youtube.com/watch?v=n-m0fh0mZXA",
 			id: "",
 		}),
 	);
@@ -27,25 +27,25 @@ export function App() {
 		enabled: !!form.data.id,
 		queryKey: ["video-info", form.data.id],
 		queryFn: async () => {
-			const command = Command.create("yt-dlp", [
-				"-j",
-				`https://www.youtube.com/watch?v=${form.data.id}`,
-			]);
+			const command = Command.create("yt-dlp", ["-j", form.data.id]);
 			const output = await command.execute();
 			return JSON.parse(output.stdout) as VideoInfo;
 		},
 	});
 
 	return (
-		<div>
+		<div className="flex flex-col gap-2 pt-4 w-full max-w-xl mx-auto">
 			<form
 				onSubmit={form.handleSubmit(() => {
 					form.fields.id.onChange(form.data.tmpId);
 				})}
 			>
-				<input {...form.fields.tmpId.props()} />
+				<label className="flex flex-col gap-0.5">
+					<span className="text-sm">Video ID or URL</span>
+					<input {...form.fields.tmpId.props()} />
+				</label>
 			</form>
-			{query.isLoading && "Loading..."}
+			{query.isLoading && <div className="p-2 mx-auto text-sm">Loading...</div>}
 			{query.isSuccess && <DownloadForm videoInfo={query.data} />}
 		</div>
 	);
@@ -62,13 +62,20 @@ function DownloadForm(props: { videoInfo: VideoInfo }) {
 	);
 
 	return (
-		<form onSubmit={form.handleSubmit(() => {})}>
-			<label>
-				Title
+		<form
+			className="flex flex-col gap-2"
+			onSubmit={form.handleSubmit(() => {
+				// TODO: download and process
+			})}
+		>
+			{/* TODO: preview iframe */}
+			{/* TODO: startTime/endTime */}
+			<label className="flex flex-col gap-0.5">
+				<span className="text-sm">Title</span>
 				<input {...form.fields.title.props()} />
 			</label>
-			<label>
-				Artist
+			<label className="flex flex-col gap-0.5">
+				<span className="text-sm">Artist</span>
 				<input {...form.fields.artist.props()} />
 			</label>
 			<button>Download</button>
