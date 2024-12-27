@@ -1,5 +1,5 @@
 import { createTinyForm } from "@hiogawa/tiny-form";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
@@ -55,7 +55,6 @@ export function App() {
 }
 
 function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
-	videoInfo.id;
 	const form = createTinyForm(
 		React.useState({
 			title: videoInfo.title,
@@ -66,12 +65,30 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 	);
 	const [player, setPlayer] = React.useState<YoutubePlayer>();
 
+	const downloadMutation = useMutation({
+		mutationFn: async () => {
+			// TODO
+			// - download audio (yt-dlp <id> -f 'ba[ext=webm]' -o 'tmp.webm')
+			// - convert to opus,
+			//   crop by startTime/endTime,
+			//   add metadata
+			//   (ffmpeg -i tmp.webm -ss startTime -to endTime -metadata title="xxx" -metadata artist="yyy" -metadata METADATA_BLOCK_PICTURE="zzz" tmp.opus)
+			// - file save dialog
+			await new Promise(() => {});
+		},
+		onError(error) {
+			console.error(error);
+			toast.error("Failed to download :(");
+		},
+		onSuccess() {
+			toast.error("Successfully downloaded :)");
+		},
+	});
+
 	return (
 		<form
 			className="flex flex-col gap-2"
-			onSubmit={form.handleSubmit(() => {
-				// TODO: download and process
-			})}
+			onSubmit={form.handleSubmit(() => downloadMutation.mutate())}
 		>
 			<div className="relative w-full aspect-video overflow-hidden">
 				<div
@@ -156,7 +173,9 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 				</div>
 				<input {...form.fields.endTime.props()} />
 			</label>
-			<button>Download</button>
+			<button disabled={downloadMutation.isPending}>
+				{downloadMutation.isPending ? "Downloading..." : "Download"}
+			</button>
 		</form>
 	);
 }
