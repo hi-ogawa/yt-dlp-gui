@@ -2,6 +2,9 @@ import { createTinyForm } from "@hiogawa/tiny-form";
 import { useQuery } from "@tanstack/react-query";
 import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
+import { formatTimestamp, parseTimestamp } from "./utils/time";
+import { toast } from "./utils/toast";
+import { type YoutubePlayer, loadYoutubePlayer } from "./utils/youtube-iframe";
 
 interface VideoInfo {
 	id: string;
@@ -34,7 +37,7 @@ export function App() {
 	});
 
 	return (
-		<div className="flex flex-col gap-2 pt-4 w-full max-w-xl mx-auto">
+		<div className="flex flex-col gap-2 pt-4 w-full max-w-lg mx-auto">
 			<form
 				onSubmit={form.handleSubmit(() => {
 					form.fields.id.onChange(form.data.tmpId);
@@ -51,15 +54,17 @@ export function App() {
 	);
 }
 
-function DownloadForm(props: { videoInfo: VideoInfo }) {
+function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
+	videoInfo.id;
 	const form = createTinyForm(
 		React.useState({
-			title: props.videoInfo.title,
-			artist: props.videoInfo.channel,
-			startTime: undefined as number | undefined,
-			endTime: undefined as number | undefined,
+			title: videoInfo.title,
+			artist: videoInfo.channel,
+			startTime: "",
+			endTime: "",
 		}),
 	);
+	const [player, setPlayer] = React.useState<YoutubePlayer>();
 
 	return (
 		<form
@@ -68,8 +73,25 @@ function DownloadForm(props: { videoInfo: VideoInfo }) {
 				// TODO: download and process
 			})}
 		>
-			{/* TODO: preview iframe */}
-			{/* TODO: startTime/endTime */}
+			<div className="relative w-full aspect-video overflow-hidden">
+				<div
+					ref={(el) => {
+						if (!el) return;
+						(async () => {
+							try {
+								const player = await loadYoutubePlayer(el!, {
+									videoId: videoInfo.id,
+								});
+								setPlayer(player);
+							} catch (e) {
+								console.error(e);
+								toast.error("Failed to load video");
+							}
+						})();
+					}}
+					className="absolute w-full h-full"
+				/>
+			</div>
 			<label className="flex flex-col gap-0.5">
 				<span className="text-sm">Title</span>
 				<input {...form.fields.title.props()} />
@@ -77,6 +99,62 @@ function DownloadForm(props: { videoInfo: VideoInfo }) {
 			<label className="flex flex-col gap-0.5">
 				<span className="text-sm">Artist</span>
 				<input {...form.fields.artist.props()} />
+			</label>
+			<label className="flex flex-col gap-0.5">
+				<div className="flex items-center gap-0.5">
+					<span className="text-sm min-w-16">Start time</span>
+					<button
+						className="p-0 px-1 text-xs"
+						onClick={() => {
+							if (player) {
+								form.fields.startTime.onChange(
+									formatTimestamp(player.getCurrentTime()),
+								);
+							}
+						}}
+					>
+						use current time
+					</button>
+					<button
+						className="p-0 px-1 text-xs"
+						onClick={() => {
+							if (player && form.data.startTime) {
+								player.seekTo(parseTimestamp(form.data.startTime));
+							}
+						}}
+					>
+						seek
+					</button>
+				</div>
+				<input {...form.fields.startTime.props()} />
+			</label>
+			<label className="flex flex-col gap-0.5">
+				<div className="flex items-center gap-0.5">
+					<span className="text-sm min-w-16">End time</span>
+					<button
+						className="p-0 px-1 text-xs"
+						onClick={() => {
+							if (player) {
+								form.fields.endTime.onChange(
+									formatTimestamp(player.getCurrentTime()),
+								);
+							}
+						}}
+					>
+						use current time
+					</button>
+					<button
+						className="p-0 px-1 text-xs"
+						onClick={() => {
+							if (player && form.data.startTime) {
+								player.seekTo(parseTimestamp(form.data.endTime));
+							}
+						}}
+					>
+						seek
+					</button>
+				</div>
+				<input {...form.fields.endTime.props()} />
 			</label>
 			<button>Download</button>
 		</form>

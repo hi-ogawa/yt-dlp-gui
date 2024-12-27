@@ -14,6 +14,9 @@ importers:
       '@hiogawa/tiny-toast':
         specifier: 0.1.1-pre.10
         version: 0.1.1-pre.10(react@19.0.0)
+      '@hiogawa/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@tanstack/react-query':
         specifier: ^5.62.10
         version: 5.62.10(react@19.0.0)
@@ -458,6 +461,9 @@ packages:
     peerDependenciesMeta:
       react:
         optional: true
+
+  '@hiogawa/utils@1.7.0':
+    resolution: {integrity: sha512-ghiEFWBR1NENoHn+lSuW7liicTIzVPN+8Srm5UedCTw43gus0mlse6Wp2lz6GmbOXJ/CalMPp/0Tz2X8tajkAg==}
 
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
@@ -1491,6 +1497,8 @@ snapshots:
   '@hiogawa/tiny-toast@0.1.1-pre.10(react@19.0.0)':
     optionalDependencies:
       react: 19.0.0
+
+  '@hiogawa/utils@1.7.0': {}
 
   '@iconify/types@2.0.0': {}
 
