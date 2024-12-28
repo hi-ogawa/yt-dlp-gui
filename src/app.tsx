@@ -25,7 +25,7 @@ interface VideoFormatInfo {
 export function App() {
 	const form = createTinyForm(
 		React.useState({
-			tmpId: "https://www.youtube.com/watch?v=pg8UiEMGY4w",
+			tmpId: "",
 			id: "",
 		}),
 	);
