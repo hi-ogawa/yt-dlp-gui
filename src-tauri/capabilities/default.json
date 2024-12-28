@@ -14,14 +14,7 @@
         {
           "name": "yt-dlp",
           "cmd": "yt-dlp",
-          "args": [
-            {
-              "validator": "\\S+"
-            },
-            {
-              "validator": "\\S+"
-            }
-          ]
+          "args": true
         }
       ]
     }

@@ -33,6 +33,9 @@ export function App() {
 			// TODO: verify yt-dlp is installed
 			const command = Command.create("yt-dlp", ["-j", form.data.id]);
 			const output = await command.execute();
+			if (output.code !== 0) {
+				throw new Error(output.stderr);
+			}
 			return JSON.parse(output.stdout) as VideoInfo;
 		},
 	});
