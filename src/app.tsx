@@ -1,7 +1,8 @@
 import { createTinyForm } from "@hiogawa/tiny-form";
-import { tinyassert } from "@hiogawa/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as path from "@tauri-apps/api/path";
+import * as dialog from "@tauri-apps/plugin-dialog";
+import * as tauriFs from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
@@ -23,7 +24,7 @@ interface VideoFormatInfo {
 export function App() {
 	const form = createTinyForm(
 		React.useState({
-			tmpId: "https://www.youtube.com/watch?v=n-m0fh0mZXA",
+			tmpId: "https://www.youtube.com/watch?v=pg8UiEMGY4w",
 			id: "",
 		}),
 	);
@@ -33,6 +34,7 @@ export function App() {
 		queryKey: ["video-info", form.data.id],
 		queryFn: async () => {
 			// TODO: verify yt-dlp is installed
+			// TODO: stream command log (at least to the console)
 			const command = Command.create("yt-dlp", ["-j", form.data.id]);
 			const output = await command.execute();
 			if (output.code !== 0) {
@@ -65,6 +67,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 		React.useState({
 			title: videoInfo.title,
 			artist: videoInfo.channel,
+			album: "",
 			startTime: "",
 			endTime: "",
 		}),
@@ -73,44 +76,34 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 
 	const downloadMutation = useMutation({
 		mutationFn: async () => {
-			// TODO
-			// - download audio (yt-dlp <id> -f 'ba[ext=webm]' -o 'tmp.webm')
-			// - convert to opus,
-			//   crop by startTime/endTime,
-			//   add metadata
-			//   (ffmpeg -i tmp.webm -ss startTime -to endTime -metadata title="xxx" -metadata artist="yyy" -metadata METADATA_BLOCK_PICTURE="zzz" tmp.opus)
-			// - file save dialog
-
-			// TODO: use tmp dir
-			// const dir = await path.appCacheDir();
-			// const tmp1 = await path.join(dir, "tmp.webm")
-			// const tmp2 = await path.join(dir, "tmp.opus")
-
-			// TODO: stream command log
-			const tmp1 = "test.webm";
-			const tmp2 = "test.opus";
+			const tempDir = await path.tempDir();
+			const tmpFile1 = await path.join(tempDir, "yt-dlp-gui-tmp.webm");
+			const tmpFile2 = await path.join(tempDir, "yt-dlp-gui-tmp.opus");
 			const output1 = await Command.create("yt-dlp", [
 				videoInfo.id,
 				"-f",
 				"ba[ext=webm]",
 				"-o",
-				tmp1,
+				tmpFile1,
 			]).execute();
 			if (output1.code !== 0) {
 				throw new Error(output1.stderr);
 			}
 
+			const { artist, title, album, startTime, endTime } = form.data;
 			const output2 = await Command.create(
 				"ffmpeg",
 				[
 					"-i",
-					tmp1,
-					form.data.title && ["-metadata", `title=${form.data.title}`],
-					form.data.artist && ["-metadata", `artist=${form.data.artist}`],
+					tmpFile1,
+					"-y",
+					title && ["-metadata", `title=${title}`],
+					artist && ["-metadata", `artist=${artist}`],
+					album && ["-metadata", `album=${album}`],
+					startTime && ["-ss", startTime],
+					endTime && ["-to", endTime],
 					// TODO: opus add thumbnail -metadata METADATA_BLOCK_PICTURE
-					form.data.startTime && ["-ss", form.data.startTime],
-					form.data.endTime && ["-to", form.data.endTime],
-					tmp2,
+					tmpFile2,
 				]
 					.flat()
 					.filter(Boolean),
@@ -119,14 +112,20 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 				throw new Error(output2.stderr);
 			}
 
-			// TODO: file save dialog
+			const downloadDir = await path.downloadDir();
+			const defaultFilename =
+				([artist, album, title].filter(Boolean).join(" - ") || "download") +
+				".opus";
+			const defaultOutputPath = await path.join(downloadDir, defaultFilename);
+			const outputPath = await dialog.save({ defaultPath: defaultOutputPath });
+			if (outputPath) {
+				await tauriFs.copyFile(tmpFile2, outputPath);
+				toast.success("Successfully downloaded :)");
+			}
 		},
 		onError(error) {
 			console.error(error);
 			toast.error("Failed to download :(");
-		},
-		onSuccess() {
-			toast.success("Successfully downloaded :)");
 		},
 	});
 

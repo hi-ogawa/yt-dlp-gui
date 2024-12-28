@@ -22,6 +22,14 @@
           "args": true
         }
       ]
+    },
+    "dialog:default",
+    "fs:default",
+    {
+      "identifier": "fs:allow-copy-file",
+      "allow": [
+        { "path": "/**/*" }
+      ]
     }
   ]
 }
