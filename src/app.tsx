@@ -86,10 +86,12 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 			// const tmp1 = await path.join(dir, "tmp.webm")
 			// const tmp2 = await path.join(dir, "tmp.opus")
 
+			// TODO: stream command log
 			const tmp1 = "test.webm";
 			const tmp2 = "test.opus";
 			const output1 = await Command.create("yt-dlp", [
 				videoInfo.id,
+				"-f",
 				"ba[ext=webm]",
 				"-o",
 				tmp1,
@@ -124,7 +126,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 			toast.error("Failed to download :(");
 		},
 		onSuccess() {
-			toast.error("Successfully downloaded :)");
+			toast.success("Successfully downloaded :)");
 		},
 	});
 
