@@ -34,9 +34,7 @@ export function App() {
 		enabled: !!form.data.id,
 		queryKey: ["video-info", form.data.id],
 		queryFn: async () => {
-			// TODO: verify yt-dlp is installed
-			// TODO: stream command log (at least to the console)
-			const command = Command.create("yt-dlp", ["-j", form.data.id]);
+			const command = Command.sidecar("binaries/yt-dlp", ["-j", form.data.id]);
 			const output = await command.execute();
 			if (output.code !== 0) {
 				throw new Error(output.stderr);
@@ -77,12 +75,14 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 
 	const downloadMutation = useMutation({
 		mutationFn: async () => {
+			// TODO: stream command log (at least to the console)
+
 			// download webm via yt-dlp
 			const tempDir = await path.tempDir();
 			const tmpFile1 = await path.join(tempDir, "yt-dlp-gui-tmp.webm");
 			const tmpFile2 = await path.join(tempDir, "yt-dlp-gui-tmp.opus");
 			const thumbnailFile = await path.join(tempDir, "yt-dlp-gui-tmp.jpg");
-			const output1 = await Command.create("yt-dlp", [
+			const output1 = await Command.sidecar("binaries/yt-dlp", [
 				videoInfo.id,
 				"-f",
 				"ba[ext=webm]",
