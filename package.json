@@ -27,6 +27,7 @@
 		"react-dom": "^19.0.0"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
 		"@tauri-apps/cli": "^2.1.0",
 		"@types/node": "^22.10.2",
 		"@types/react": "^19.0.2",
