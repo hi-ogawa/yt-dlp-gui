@@ -30,6 +30,7 @@ export function App() {
 		enabled: !!form.data.id,
 		queryKey: ["video-info", form.data.id],
 		queryFn: async () => {
+			// TODO: verify yt-dlp is installed
 			const command = Command.create("yt-dlp", ["-j", form.data.id]);
 			const output = await command.execute();
 			return JSON.parse(output.stdout) as VideoInfo;

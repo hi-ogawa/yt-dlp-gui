@@ -7,6 +7,7 @@ const host = process.env.TAURI_DEV_HOST;
 
 export default defineConfig(async () => ({
 	clearScreen: false,
+	// TODO: unocss is blank on dev initial load
 	plugins: [unocss({ presets: [presetUno()] }), react()],
 	server: {
 		port: 1420,
