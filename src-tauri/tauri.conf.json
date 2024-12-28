@@ -14,8 +14,8 @@
 		"windows": [
 			{
 				"title": "yt-dlp-gui",
-				"width": 800,
-				"height": 600
+				"width": 650,
+				"height": 650
 			}
 		],
 		"security": {
