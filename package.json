@@ -8,6 +8,7 @@
 		"build": "pnpm run --sequential /^build:/",
 		"build:no-bundle": "tauri build --no-bundle",
 		"build:bundle": "tauri bundle --bundles appimage",
+		"build-pkgbuild": "tauri bundle --bundles deb && bash pkgbuild/build.sh",
 		"vite": "vite",
 		"test": "vitest --dir src",
 		"lint": "biome check --write . && cd src-tauri && cargo fmt",
