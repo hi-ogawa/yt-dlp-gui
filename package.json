@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "tauri dev",
 		"build": "pnpm run --sequential /^build:/",
-		"build:build": "tauri build --no-bundle",
+		"build:no-bundle": "tauri build --no-bundle",
 		"build:bundle": "tauri bundle --bundles appimage",
 		"vite": "vite",
 		"test": "vitest --dir src",
