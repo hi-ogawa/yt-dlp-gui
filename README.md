@@ -1,7 +1,8 @@
-# yt-dlp-gui (wip)
+# yt-dlp-gui
 
-Alternative of https://github.com/hi-ogawa/youtube-dl-web-v2
+alternative of https://github.com/hi-ogawa/youtube-dl-web-v2
 
 ```sh
-pnpm tauri dev
+pnpm dev
+pnpm build
 ```

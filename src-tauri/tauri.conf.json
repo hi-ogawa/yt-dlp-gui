@@ -4,9 +4,9 @@
 	"version": "0.1.0",
 	"identifier": "com.yt-dlp-gui.app",
 	"build": {
-		"beforeDevCommand": "pnpm dev",
+		"beforeDevCommand": "pnpm vite dev",
 		"devUrl": "http://localhost:1420",
-		"beforeBuildCommand": "pnpm build",
+		"beforeBuildCommand": "pnpm vite build",
 		"frontendDist": "../dist"
 	},
 	"app": {
@@ -14,8 +14,8 @@
 		"windows": [
 			{
 				"title": "yt-dlp-gui",
-				"width": 800,
-				"height": 600
+				"width": 650,
+				"height": 700
 			}
 		],
 		"security": {

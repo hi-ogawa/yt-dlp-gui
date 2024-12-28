@@ -1,0 +1,14 @@
+pkgname="yt-dlp-gui-bin"
+pkgver="0.1.0"
+pkgrel=1
+pkgdesc=""
+arch=('x86_64')
+url=""
+license=('MIT')
+depends=('gtk3' 'webkit2gtk' 'ffmpeg' 'yt-dlp')
+source=("yt-dlp-gui_${pkgver}_amd64.deb")
+sha512sums=("SKIP")
+
+package(){
+  tar -xz -f data.tar.gz -C "${pkgdir}"
+}
