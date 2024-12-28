@@ -5,9 +5,10 @@ import * as dialog from "@tauri-apps/plugin-dialog";
 import * as tauriFs from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
+import * as flacPicture from "./flac-picture";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
 import { toast } from "./utils/toast";
-import { type YoutubePlayer, loadYoutubePlayer } from "./utils/youtube-iframe";
+import { type YoutubePlayer, loadYoutubePlayer } from "./utils/youtube";
 
 interface VideoInfo {
 	id: string;
@@ -76,33 +77,43 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 
 	const downloadMutation = useMutation({
 		mutationFn: async () => {
+			// download webm via yt-dlp
 			const tempDir = await path.tempDir();
 			const tmpFile1 = await path.join(tempDir, "yt-dlp-gui-tmp.webm");
 			const tmpFile2 = await path.join(tempDir, "yt-dlp-gui-tmp.opus");
+			const thumbnailFile = await path.join(tempDir, "yt-dlp-gui-tmp.jpg");
 			const output1 = await Command.create("yt-dlp", [
 				videoInfo.id,
 				"-f",
 				"ba[ext=webm]",
 				"-o",
 				tmpFile1,
+				"--write-thumbnail",
+				"--convert-thumbnails",
+				"jpg",
 			]).execute();
 			if (output1.code !== 0) {
 				throw new Error(output1.stderr);
 			}
 
+			// process thumbnail data
+			const thumbnailData = await tauriFs.readFile(thumbnailFile);
+			const thumbnailDataFlac = flacPicture.encode(thumbnailData);
+
+			// convert webm to opus
 			const { artist, title, album, startTime, endTime } = form.data;
 			const output2 = await Command.create(
 				"ffmpeg",
 				[
-					"-i",
-					tmpFile1,
+					"-hide_banner",
 					"-y",
+					["-i", tmpFile1],
 					title && ["-metadata", `title=${title}`],
 					artist && ["-metadata", `artist=${artist}`],
 					album && ["-metadata", `album=${album}`],
 					startTime && ["-ss", startTime],
 					endTime && ["-to", endTime],
-					// TODO: opus add thumbnail -metadata METADATA_BLOCK_PICTURE
+					["-metadata", `METADATA_BLOCK_PICTURE=${thumbnailDataFlac}`],
 					tmpFile2,
 				]
 					.flat()

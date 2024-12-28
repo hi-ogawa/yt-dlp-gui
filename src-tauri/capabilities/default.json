@@ -26,6 +26,12 @@
     "dialog:default",
     "fs:default",
     {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        { "path": "$TEMP/*" }
+      ]
+    },
+    {
       "identifier": "fs:allow-copy-file",
       "allow": [
         { "path": "/**/*" }
