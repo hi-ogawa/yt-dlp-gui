@@ -23,4 +23,9 @@ jobs:
       - run: pnpm lint-check
       - run: pnpm tsc
       - run: pnpm test
+      # https://github.com/tauri-apps/tauri-action
+      - name: linux libs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: pnpm build:build
