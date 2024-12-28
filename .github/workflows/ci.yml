@@ -28,9 +28,3 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - run: pnpm build
-      - uses: softprops/action-gh-release@v2
-        with:
-          prerelease: true
-          name: 0.0.0-pre.${{ github.sha }}
-          tag_name: 0.0.0-pre.${{ github.sha }}
-          files: src-tauri/target/release/bundle/appimage/*.AppImage
