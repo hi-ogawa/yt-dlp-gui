@@ -5,7 +5,7 @@ pkgdesc=""
 arch=('x86_64')
 url=""
 license=('MIT')
-depends=('gtk3' 'webkit2gtk')
+depends=('gtk3' 'webkit2gtk' 'ffmpeg' 'yt-dlp')
 source=("yt-dlp-gui_${pkgver}_amd64.deb")
 sha512sums=("SKIP")
 
