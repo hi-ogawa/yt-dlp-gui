@@ -1,5 +1,7 @@
 import { createTinyForm } from "@hiogawa/tiny-form";
+import { tinyassert } from "@hiogawa/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import * as path from "@tauri-apps/api/path";
 import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
@@ -78,7 +80,44 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 			//   add metadata
 			//   (ffmpeg -i tmp.webm -ss startTime -to endTime -metadata title="xxx" -metadata artist="yyy" -metadata METADATA_BLOCK_PICTURE="zzz" tmp.opus)
 			// - file save dialog
-			await new Promise(() => {});
+
+			// TODO: use tmp dir
+			// const dir = await path.appCacheDir();
+			// const tmp1 = await path.join(dir, "tmp.webm")
+			// const tmp2 = await path.join(dir, "tmp.opus")
+
+			const tmp1 = "test.webm";
+			const tmp2 = "test.opus";
+			const output1 = await Command.create("yt-dlp", [
+				videoInfo.id,
+				"ba[ext=webm]",
+				"-o",
+				tmp1,
+			]).execute();
+			if (output1.code !== 0) {
+				throw new Error(output1.stderr);
+			}
+
+			const output2 = await Command.create(
+				"ffmpeg",
+				[
+					"-i",
+					tmp1,
+					form.data.title && ["-metadata", `title=${form.data.title}`],
+					form.data.artist && ["-metadata", `artist=${form.data.artist}`],
+					// TODO: opus add thumbnail -metadata METADATA_BLOCK_PICTURE
+					form.data.startTime && ["-ss", form.data.startTime],
+					form.data.endTime && ["-to", form.data.endTime],
+					tmp2,
+				]
+					.flat()
+					.filter(Boolean),
+			).execute();
+			if (output2.code !== 0) {
+				throw new Error(output2.stderr);
+			}
+
+			// TODO: file save dialog
 		},
 		onError(error) {
 			console.error(error);
@@ -125,6 +164,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 				<div className="flex items-center gap-0.5">
 					<span className="text-sm min-w-16">Start time</span>
 					<button
+						type="button"
 						className="p-0 px-1 text-xs"
 						onClick={() => {
 							if (player) {
@@ -137,6 +177,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 						use current time
 					</button>
 					<button
+						type="button"
 						className="p-0 px-1 text-xs"
 						onClick={() => {
 							if (player && form.data.startTime) {
@@ -153,6 +194,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 				<div className="flex items-center gap-0.5">
 					<span className="text-sm min-w-16">End time</span>
 					<button
+						type="button"
 						className="p-0 px-1 text-xs"
 						onClick={() => {
 							if (player) {
@@ -165,6 +207,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 						use current time
 					</button>
 					<button
+						type="button"
 						className="p-0 px-1 text-xs"
 						onClick={() => {
 							if (player && form.data.startTime) {
