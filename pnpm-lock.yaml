@@ -8,9 +8,19 @@ importers:
 
   .:
     dependencies:
+      electron:
+        specifier: ^33.2.1
+        version: 33.2.1
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.9.4
+        version: 1.9.4
       '@hiogawa/tiny-form':
         specifier: 0.0.1-pre.10
         version: 0.0.1-pre.10(react@19.0.0)
+      '@hiogawa/tiny-rpc':
+        specifier: 0.2.3-pre.18
+        version: 0.2.3-pre.18
       '@hiogawa/tiny-toast':
         specifier: 0.1.1-pre.10
         version: 0.1.1-pre.10(react@19.0.0)
@@ -23,6 +33,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.1.1
         version: 2.1.1
+      '@tauri-apps/cli':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@tauri-apps/plugin-dialog':
         specifier: ~2
         version: 2.2.0
@@ -35,28 +48,6 @@ importers:
       '@tauri-apps/plugin-shell':
         specifier: ~2
         version: 2.2.0
-      electron:
-        specifier: ^33.2.1
-        version: 33.2.1
-      electron-builder:
-        specifier: ^25.1.8
-        version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
-      react:
-        specifier: ^19.0.0
-        version: 19.0.0
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.0.0(react@19.0.0)
-      tsup:
-        specifier: 8.3.0
-        version: 8.3.0(jiti@2.4.2)(postcss@8.4.49)(tsx@4.19.2)(typescript@5.7.2)
-    devDependencies:
-      '@biomejs/biome':
-        specifier: ^1.9.4
-        version: 1.9.4
-      '@tauri-apps/cli':
-        specifier: ^2.1.0
-        version: 2.1.0
       '@types/node':
         specifier: ^22.10.2
         version: 22.10.2
@@ -69,9 +60,21 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.3.4(vite@6.0.6(@types/node@22.10.2)(jiti@2.4.2)(tsx@4.19.2))
+      electron-builder:
+        specifier: ^25.1.8
+        version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
+      react:
+        specifier: ^19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.0.0(react@19.0.0)
       tinyexec:
         specifier: ^0.3.2
         version: 0.3.2
+      tsup:
+        specifier: 8.3.0
+        version: 8.3.0(jiti@2.4.2)(postcss@8.4.49)(tsx@4.19.2)(typescript@5.7.2)
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
@@ -567,6 +570,9 @@ packages:
     peerDependenciesMeta:
       react:
         optional: true
+
+  '@hiogawa/tiny-rpc@0.2.3-pre.18':
+    resolution: {integrity: sha512-BiNHrutG9G9yV622QvkxZxF+PhkaH2Aspp4/X1KYTfnaQTcg4fFUTBWf5Kf533swon2SuVJwi6U6H1LQbhVOQQ==}
 
   '@hiogawa/tiny-toast@0.1.1-pre.10':
     resolution: {integrity: sha512-vA0kmobSc0KSQw/ff3Fm9pQBkJkhaHcvjuhpBYnBjev4dC2qeCGOvUax/+iUMYns816z6/X3XAr3Mwp92qZtuQ==}
@@ -3179,6 +3185,8 @@ snapshots:
   '@hiogawa/tiny-form@0.0.1-pre.10(react@19.0.0)':
     optionalDependencies:
       react: 19.0.0
+
+  '@hiogawa/tiny-rpc@0.2.3-pre.18': {}
 
   '@hiogawa/tiny-toast@0.1.1-pre.10(react@19.0.0)':
     optionalDependencies:

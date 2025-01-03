@@ -1,8 +1,4 @@
 import { contextBridge, ipcRenderer } from "electron";
+import { rpcPreloadSetup } from "./rpc/utils";
 
-function main() {
-	ipcRenderer;
-	contextBridge.exposeInMainWorld("PRELOAD_API", {});
-}
-
-main();
+rpcPreloadSetup(contextBridge, ipcRenderer);

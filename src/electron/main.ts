@@ -1,9 +1,20 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { BrowserWindow, app } from "electron";
+import { exposeTinyRpc } from "@hiogawa/tiny-rpc";
+import { BrowserWindow, app, ipcMain } from "electron";
+import { rpcRoutes } from "./rpc/server";
+import { rpcServerAdapter } from "./rpc/utils";
 
 async function main() {
 	await app.whenReady();
+
+	// setup rpc
+	exposeTinyRpc({
+		routes: rpcRoutes,
+		adapter: rpcServerAdapter(ipcMain),
+	});
+
+	// open window
 	const dirname = app.getAppPath();
 	const window = new BrowserWindow({
 		webPreferences: {
