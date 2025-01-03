@@ -1,8 +1,8 @@
-import { type Result, x } from "tinyexec";
+import { ChildProcess, spawn } from "node:child_process";
 import { defineConfig } from "tsup";
 
 const dev = process.env["NODE_ENV"] === "development";
-let app: Result | undefined;
+let app: ChildProcess | undefined;
 
 export default defineConfig({
 	entry: ["src/electron/main.ts", "src/electron/preload.ts"],
@@ -17,10 +17,8 @@ export default defineConfig({
 			async buildEnd() {
 				if (dev) {
 					app?.kill();
-					app = x("pnpm", ["electron-start"], {
-						nodeOptions: {
-							stdio: "inherit",
-						},
+					app = spawn("pnpm", ["electron-start"], {
+						stdio: "inherit",
 					});
 				}
 			},

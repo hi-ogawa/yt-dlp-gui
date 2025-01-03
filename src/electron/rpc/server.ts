@@ -8,6 +8,8 @@ import type { VideoInfo } from "../../utils/youtube";
 
 // TODO: verify yt-dlp, ffmpeg is installed
 // TODO: stream command log
+// TODO: error handling
+
 const $ = promisify(execFile);
 
 export class RpcHandler {
