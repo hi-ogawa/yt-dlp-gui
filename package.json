@@ -4,13 +4,15 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "tauri dev",
-		"build": "tauri build --no-bundle",
-		"build-arch": "tauri build --bundles deb && bash misc/pkgbuild/build.sh",
-		"vite": "vite",
+		"dev": "pnpm run --stream '/web-dev|electron-dev/'",
+		"web-dev": "vite dev",
+		"web-build": "vite build",
+		"electron-dev": "START_APP=1 tsup --watch",
+		"electron-build": "tsup",
+		"electron-start": "electron ./dist/electron/main.cjs",
 		"test": "vitest --dir src",
-		"lint": "biome check --write . && cd src-tauri && cargo fmt",
-		"lint-check": "biome check . && cd src-tauri && cargo fmt --check"
+		"lint": "biome check --write .",
+		"lint-check": "biome check ."
 	},
 	"dependencies": {
 		"@hiogawa/tiny-form": "0.0.1-pre.10",
@@ -22,8 +24,11 @@
 		"@tauri-apps/plugin-fs": "~2",
 		"@tauri-apps/plugin-opener": "^2.2.2",
 		"@tauri-apps/plugin-shell": "~2",
+		"electron": "^33.2.1",
+		"electron-builder": "^25.1.8",
 		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"react-dom": "^19.0.0",
+		"tsup": "8.3.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
@@ -32,6 +37,7 @@
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
 		"@vitejs/plugin-react": "^4.3.4",
+		"tinyexec": "^0.3.2",
 		"typescript": "^5.7.2",
 		"unocss": "^0.65.3",
 		"vite": "^6.0.6",
