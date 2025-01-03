@@ -3,8 +3,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import * as path from "@tauri-apps/api/path";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import * as tauriFs from "@tauri-apps/plugin-fs";
-import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
+import { rpc } from "./electron/rpc/client";
 import * as flacPicture from "./flac-picture";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
 import { toast } from "./utils/toast";
@@ -25,7 +25,9 @@ interface VideoFormatInfo {
 export function App() {
 	const form = createTinyForm(
 		React.useState({
-			tmpId: "",
+			tmpId: import.meta.env.DEV
+				? "https://www.youtube.com/watch?v=aS0Id3EJb4k"
+				: "",
 			id: "",
 		}),
 	);
@@ -36,11 +38,11 @@ export function App() {
 		queryFn: async () => {
 			// TODO: verify yt-dlp is installed
 			// TODO: stream command log (at least to the console)
-			const command = Command.create("yt-dlp", ["-j", form.data.id]);
-			const output = await command.execute();
-			if (output.code !== 0) {
-				throw new Error(output.stderr);
-			}
+			const output = await rpc.command("yt-dlp", [
+				"--no-playlist",
+				"-j",
+				form.data.id,
+			]);
 			return JSON.parse(output.stdout) as VideoInfo;
 		},
 	});
@@ -82,8 +84,9 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 			const tmpFile1 = await path.join(tempDir, "yt-dlp-gui-tmp.webm");
 			const tmpFile2 = await path.join(tempDir, "yt-dlp-gui-tmp.opus");
 			const thumbnailFile = await path.join(tempDir, "yt-dlp-gui-tmp.jpg");
-			const output1 = await Command.create("yt-dlp", [
+			const output1 = await rpc.command("yt-dlp", [
 				videoInfo.id,
+				"--no-playlist",
 				"-f",
 				"ba[ext=webm]",
 				"-o",
@@ -91,7 +94,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 				"--write-thumbnail",
 				"--convert-thumbnails",
 				"jpg",
-			]).execute();
+			]);
 			if (output1.code !== 0) {
 				throw new Error(output1.stderr);
 			}
@@ -102,7 +105,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 
 			// convert webm to opus
 			const { artist, title, album, startTime, endTime } = form.data;
-			const output2 = await Command.create(
+			const output2 = await rpc.command(
 				"ffmpeg",
 				[
 					"-hide_banner",
@@ -118,7 +121,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 				]
 					.flat()
 					.filter(Boolean),
-			).execute();
+			);
 			if (output2.code !== 0) {
 				throw new Error(output2.stderr);
 			}
