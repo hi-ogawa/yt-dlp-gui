@@ -1,12 +1,12 @@
+import assert from "node:assert";
+import { createServer } from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { exposeTinyRpc } from "@hiogawa/tiny-rpc";
 import { BrowserWindow, app, ipcMain } from "electron";
+import sirv from "sirv";
 import { RpcHandler } from "./rpc/server";
 import { rpcServerAdapter } from "./rpc/utils";
-import { createServer } from "node:http";
-import sirv from "sirv"
-import assert from "node:assert";
 
 async function main() {
 	await app.whenReady();
@@ -39,7 +39,7 @@ async function main() {
 			handler(req, res, () => {
 				res.statusCode = 404;
 				res.end("Not found");
-			})
+			});
 		});
 		await new Promise<void>((resolve) => server.listen(() => resolve()));
 		const address = server.address();
