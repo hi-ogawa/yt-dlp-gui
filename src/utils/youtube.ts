@@ -38,3 +38,15 @@ export function loadYoutubePlayer(
 		});
 	});
 }
+
+export interface VideoInfo {
+	id: string;
+	channel: string;
+	title: string;
+	formats: VideoFormatInfo[];
+}
+
+interface VideoFormatInfo {
+	format_id: string;
+	format: string;
+}

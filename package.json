@@ -3,39 +3,44 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
+	"main": "./dist/electron/main.cjs",
 	"scripts": {
-		"dev": "tauri dev",
-		"build": "tauri build --no-bundle",
-		"build-arch": "tauri build --bundles deb && bash misc/pkgbuild/build.sh",
-		"vite": "vite",
+		"dev": "pnpm run --stream '/web-dev|electron-dev/'",
+		"build": "pnpm web-build && pnpm electron-build",
+		"web-dev": "vite dev",
+		"web-build": "vite build",
+		"electron-dev": "NODE_ENV=development tsup --watch",
+		"electron-build": "tsup",
+		"electron-start": "electron .",
+		"package": "electron-builder build --publish never",
 		"test": "vitest --dir src",
-		"lint": "biome check --write . && cd src-tauri && cargo fmt",
-		"lint-check": "biome check . && cd src-tauri && cargo fmt --check"
-	},
-	"dependencies": {
-		"@hiogawa/tiny-form": "0.0.1-pre.10",
-		"@hiogawa/tiny-toast": "0.1.1-pre.10",
-		"@hiogawa/utils": "^1.7.0",
-		"@tanstack/react-query": "^5.62.10",
-		"@tauri-apps/api": "^2.1.1",
-		"@tauri-apps/plugin-dialog": "~2",
-		"@tauri-apps/plugin-fs": "~2",
-		"@tauri-apps/plugin-opener": "^2.2.2",
-		"@tauri-apps/plugin-shell": "~2",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0"
+		"lint": "biome check --write .",
+		"lint-check": "biome check ."
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"@tauri-apps/cli": "^2.1.0",
+		"@hiogawa/tiny-form": "0.0.1-pre.10",
+		"@hiogawa/tiny-rpc": "0.2.3-pre.18",
+		"@hiogawa/tiny-toast": "0.1.1-pre.10",
+		"@hiogawa/utils": "^1.7.0",
+		"@tanstack/react-query": "^5.62.10",
 		"@types/node": "^22.10.2",
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
 		"@vitejs/plugin-react": "^4.3.4",
+		"electron": "^33.2.1",
+		"electron-builder": "^25.1.8",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"sirv": "^3.0.0",
+		"tsup": "8.3.0",
 		"typescript": "^5.7.2",
 		"unocss": "^0.65.3",
 		"vite": "^6.0.6",
 		"vitest": "3.0.0-beta.3"
 	},
-	"packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf"
+	"packageManager": "pnpm@9.15.1+sha512.1acb565e6193efbebda772702950469150cf12bcc764262e7587e71d19dc98a423dff9536e57ea44c49bdf790ff694e83c27be5faa23d67e0c033b583be4bfcf",
+	"volta": {
+		"node": "20.18.1"
+	}
 }

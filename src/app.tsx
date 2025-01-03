@@ -1,31 +1,21 @@
 import { createTinyForm } from "@hiogawa/tiny-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import * as path from "@tauri-apps/api/path";
-import * as dialog from "@tauri-apps/plugin-dialog";
-import * as tauriFs from "@tauri-apps/plugin-fs";
-import { Command } from "@tauri-apps/plugin-shell";
 import React from "react";
-import * as flacPicture from "./flac-picture";
+import { rpc } from "./electron/rpc/client";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
 import { toast } from "./utils/toast";
-import { type YoutubePlayer, loadYoutubePlayer } from "./utils/youtube";
-
-interface VideoInfo {
-	id: string;
-	channel: string;
-	title: string;
-	formats: VideoFormatInfo[];
-}
-
-interface VideoFormatInfo {
-	format_id: string;
-	format: string;
-}
+import {
+	type VideoInfo,
+	type YoutubePlayer,
+	loadYoutubePlayer,
+} from "./utils/youtube";
 
 export function App() {
 	const form = createTinyForm(
 		React.useState({
-			tmpId: "",
+			tmpId: import.meta.env.DEV
+				? "https://www.youtube.com/watch?v=aS0Id3EJb4k"
+				: "",
 			id: "",
 		}),
 	);
@@ -34,14 +24,7 @@ export function App() {
 		enabled: !!form.data.id,
 		queryKey: ["video-info", form.data.id],
 		queryFn: async () => {
-			// TODO: verify yt-dlp is installed
-			// TODO: stream command log (at least to the console)
-			const command = Command.create("yt-dlp", ["-j", form.data.id]);
-			const output = await command.execute();
-			if (output.code !== 0) {
-				throw new Error(output.stderr);
-			}
-			return JSON.parse(output.stdout) as VideoInfo;
+			return rpc.getVideoInfo(form.data.id);
 		},
 	});
 
@@ -77,60 +60,11 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 
 	const downloadMutation = useMutation({
 		mutationFn: async () => {
-			// download webm via yt-dlp
-			const tempDir = await path.tempDir();
-			const tmpFile1 = await path.join(tempDir, "yt-dlp-gui-tmp.webm");
-			const tmpFile2 = await path.join(tempDir, "yt-dlp-gui-tmp.opus");
-			const thumbnailFile = await path.join(tempDir, "yt-dlp-gui-tmp.jpg");
-			const output1 = await Command.create("yt-dlp", [
-				videoInfo.id,
-				"-f",
-				"ba[ext=webm]",
-				"-o",
-				tmpFile1,
-				"--write-thumbnail",
-				"--convert-thumbnails",
-				"jpg",
-			]).execute();
-			if (output1.code !== 0) {
-				throw new Error(output1.stderr);
-			}
-
-			// process thumbnail data
-			const thumbnailData = await tauriFs.readFile(thumbnailFile);
-			const thumbnailDataFlac = flacPicture.encode(thumbnailData);
-
-			// convert webm to opus
-			const { artist, title, album, startTime, endTime } = form.data;
-			const output2 = await Command.create(
-				"ffmpeg",
-				[
-					"-hide_banner",
-					"-y",
-					["-i", tmpFile1],
-					title && ["-metadata", `title=${title}`],
-					artist && ["-metadata", `artist=${artist}`],
-					album && ["-metadata", `album=${album}`],
-					startTime && ["-ss", startTime],
-					endTime && ["-to", endTime],
-					["-metadata", `METADATA_BLOCK_PICTURE=${thumbnailDataFlac}`],
-					tmpFile2,
-				]
-					.flat()
-					.filter(Boolean),
-			).execute();
-			if (output2.code !== 0) {
-				throw new Error(output2.stderr);
-			}
-
-			const downloadDir = await path.downloadDir();
-			const defaultFilename =
-				([artist, album, title].filter(Boolean).join(" - ") || "download") +
-				".opus";
-			const defaultOutputPath = await path.join(downloadDir, defaultFilename);
-			const outputPath = await dialog.save({ defaultPath: defaultOutputPath });
-			if (outputPath) {
-				await tauriFs.copyFile(tmpFile2, outputPath);
+			const saved = await rpc.download({
+				id: videoInfo.id,
+				...form.data,
+			});
+			if (saved) {
 				toast.success("Successfully downloaded :)");
 			}
 		},
