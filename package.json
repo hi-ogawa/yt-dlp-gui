@@ -5,9 +5,10 @@
 	"type": "module",
 	"scripts": {
 		"dev": "pnpm run --stream '/web-dev|electron-dev/'",
+		"build": "pnpm web-build && pnpm electron-build",
 		"web-dev": "vite dev",
 		"web-build": "vite build",
-		"electron-dev": "START_APP=1 tsup --watch",
+		"electron-dev": "NODE_ENV=development tsup --watch",
 		"electron-build": "tsup",
 		"electron-start": "electron ./dist/electron/main.cjs",
 		"test": "vitest --dir src",
