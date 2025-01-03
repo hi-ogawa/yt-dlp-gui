@@ -7,7 +7,9 @@ import type { ContextBridge, IpcMain, IpcRenderer } from "electron";
 export function rpcServerAdapter(ipcMain: IpcMain): TinyRpcServerAdapter<void> {
 	return {
 		register: (invokeRoute) => {
-			ipcMain.handle("__rpc", (_event, data) => invokeRoute(data));
+			ipcMain.handle("__rpc", (_event, data) => {
+				return invokeRoute(data);
+			});
 		},
 	};
 }
@@ -17,7 +19,9 @@ export function rpcPreloadSetup(
 	ipcRenderer: IpcRenderer,
 ) {
 	contextBridge.exposeInMainWorld("__RPC_API", {
-		__rpc: (...args: any[]) => ipcRenderer.invoke("__rpc", ...args),
+		__rpc: (...args: any[]) => {
+			return ipcRenderer.invoke("__rpc", ...args);
+		},
 	});
 }
 

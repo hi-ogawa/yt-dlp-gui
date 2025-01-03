@@ -1,7 +1,7 @@
 import { proxyTinyRpc } from "@hiogawa/tiny-rpc";
-import type { rpcRoutes } from "./server";
+import type { RpcHandler } from "./server";
 import { rpcClientAdapter } from "./utils";
 
-export const rpc = proxyTinyRpc<typeof rpcRoutes>({
+export const rpc = proxyTinyRpc<RpcHandler>({
 	adapter: rpcClientAdapter(),
 });
