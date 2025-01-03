@@ -9,10 +9,9 @@ async function main() {
 	await app.whenReady();
 
 	// setup window
-	const dirname = app.getAppPath();
 	const window = new BrowserWindow({
 		webPreferences: {
-			preload: path.join(dirname, "preload.cjs"),
+			preload: path.join(__dirname, "preload.cjs"),
 		},
 	});
 
@@ -25,7 +24,7 @@ async function main() {
 	await window.loadURL(
 		import.meta.env.DEV
 			? "http://localhost:1420"
-			: pathToFileURL(path.join(dirname, "../web/index.html")).href,
+			: pathToFileURL(path.join(__dirname, "../web/index.html")).href,
 	);
 }
 

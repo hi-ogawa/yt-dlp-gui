@@ -8,6 +8,7 @@ export default defineConfig({
 	entry: ["src/electron/main.ts", "src/electron/preload.ts"],
 	format: ["cjs"], // preload needs to be cjs
 	outDir: "dist/electron",
+	external: ["electron"],
 	define: {
 		"import.meta.env.DEV": JSON.stringify(dev),
 	},

@@ -3,6 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",
+	"main": "./dist/electron/main.cjs",
 	"scripts": {
 		"dev": "pnpm run --stream '/web-dev|electron-dev/'",
 		"build": "pnpm web-build && pnpm electron-build",
@@ -11,12 +12,10 @@
 		"electron-dev": "NODE_ENV=development tsup --watch",
 		"electron-build": "tsup",
 		"electron-start": "electron ./dist/electron/main.cjs",
+		"package": "electron-builder build --publish never",
 		"test": "vitest --dir src",
 		"lint": "biome check --write .",
 		"lint-check": "biome check ."
-	},
-	"dependencies": {
-		"electron": "^33.2.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
@@ -29,6 +28,7 @@
 		"@types/react": "^19.0.2",
 		"@types/react-dom": "^19.0.2",
 		"@vitejs/plugin-react": "^4.3.4",
+		"electron": "^33.2.1",
 		"electron-builder": "^25.1.8",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
