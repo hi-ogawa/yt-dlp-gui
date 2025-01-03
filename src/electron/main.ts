@@ -12,6 +12,8 @@ async function main() {
 
 	// setup window
 	const window = new BrowserWindow({
+		width: 600,
+		height: 700,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.cjs"),
 		},
