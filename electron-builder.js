@@ -6,7 +6,6 @@ export default {
 	files: ["dist/electron/**", "dist/web/**"],
 	npmRebuild: false,
 	linux: {
-		target: "pacman",
-		maintainer: "test@example.com",
+		target: "AppImage",
 	},
 };
