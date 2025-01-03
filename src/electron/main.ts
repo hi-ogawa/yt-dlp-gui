@@ -1,7 +1,6 @@
 import assert from "node:assert";
 import { createServer } from "node:http";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { exposeTinyRpc } from "@hiogawa/tiny-rpc";
 import { BrowserWindow, app, ipcMain } from "electron";
 import sirv from "sirv";
@@ -24,14 +23,11 @@ async function main() {
 		adapter: rpcServerAdapter(ipcMain),
 	});
 
-	await window.loadURL(
-		import.meta.env.DEV
-			? "http://localhost:1420"
-			: pathToFileURL(path.join(__dirname, "../web/index.html")).href,
-	);
-
-	let windowUrl = "http://localhost:1420";
-	if (!import.meta.env.DEV) {
+	let windowUrl: string;
+	if (import.meta.env.DEV) {
+		// hard-coded dev server url
+		windowUrl = "http://localhost:1420";
+	} else {
 		// serve static assets from localhost for youtube iframe
 		// https://stackoverflow.com/questions/52856299/youtube-videos-not-played-in-electron-app-but-in-a-website-does
 		const handler = sirv(path.join(__dirname, "../web"));
