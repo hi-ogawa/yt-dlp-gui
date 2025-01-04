@@ -16,8 +16,19 @@ export class RpcHandler {
 	constructor(private window: BrowserWindow) {}
 
 	async getVideoInfo(id: string) {
-		const result = await $("yt-dlp", ["--no-playlist", "-j", id]);
-		return JSON.parse(result.stdout) as VideoInfo;
+		using dir = createTempDirectory();
+		const outfileArg = dir.join("tmp");
+		const outfile = dir.join("tmp.info.json");
+		await $("yt-dlp", [
+			id,
+			"--no-playlist",
+			"--skip-download",
+			"--write-info-json",
+			"-o",
+			outfileArg,
+		]);
+		const data = await fs.promises.readFile(outfile, "utf-8");
+		return JSON.parse(data) as VideoInfo;
 	}
 
 	async download(data: {
@@ -28,15 +39,12 @@ export class RpcHandler {
 		startTime: string;
 		endTime: string;
 	}) {
+		using dir = createTempDirectory();
+		const tmpFile1 = dir.join("tmp.webm");
+		const tmpFile2 = dir.join("tmp.opus");
+		const thumbnailFile = dir.join("tmp.jpg");
+
 		// download webm audio and thumbnail via yt-dlp
-		const tmpDir = path.join(
-			app.getPath("temp"),
-			`yt-dlp-gui-${Math.random().toString(36).slice(2)}`,
-		);
-		using _ = setupTempDirectory(tmpDir);
-		const tmpFile1 = path.join(tmpDir, "tmp.webm");
-		const tmpFile2 = path.join(tmpDir, "tmp.opus");
-		const thumbnailFile = path.join(tmpDir, "tmp.jpg");
 		await $("yt-dlp", [
 			data.id,
 			"--no-playlist",
@@ -90,9 +98,14 @@ export class RpcHandler {
 	}
 }
 
-function setupTempDirectory(dir: string) {
+function createTempDirectory() {
+	const dir = path.join(
+		app.getPath("temp"),
+		`yt-dlp-gui-${Math.random().toString(36).slice(2)}`,
+	);
 	fs.mkdirSync(dir, { recursive: true });
 	return {
+		join: (...args: string[]) => path.join(dir, ...args),
 		[Symbol.dispose]: () => {
 			fs.rmSync(dir, { recursive: true, force: true });
 		},
