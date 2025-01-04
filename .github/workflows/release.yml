@@ -1,16 +1,14 @@
-name: ci
+name: release
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags:
+      - "v*.*.*"
 
-concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: write
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,8 +17,9 @@ jobs:
           node-version: 20
       - run: corepack enable
       - run: pnpm i
-      - run: pnpm lint-check
-      - run: pnpm tsc
-      - run: pnpm test
       - run: pnpm build
       - run: pnpm package
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/builder/*.AppImage
