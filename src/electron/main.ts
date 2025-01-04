@@ -11,14 +11,22 @@ async function main() {
 	await app.whenReady();
 
 	// menu
-	const menu = Menu.getApplicationMenu();
-	assert(menu);
+	let menu = Menu.getApplicationMenu();
+	if (!menu) {
+		menu = Menu.buildFromTemplate([]);
+		Menu.setApplicationMenu(menu);
+	}
 	menu.append(
 		new MenuItem({
 			label: "Logs",
-			async click() {
-				await shell.openPath(path.join(app.getPath("logs"), "main.log"));
-			},
+			submenu: [
+				{
+					label: "main",
+					async click() {
+						await shell.openPath(path.join(app.getPath("logs"), "main.log"));
+					},
+				},
+			],
 		}),
 	);
 
