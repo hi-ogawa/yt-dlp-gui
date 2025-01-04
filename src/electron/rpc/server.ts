@@ -1,16 +1,13 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { promisify } from "node:util";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
 import type { VideoInfo } from "../../utils/youtube";
 
 // TODO: verify yt-dlp, ffmpeg is installed
-// TODO: stream command log
-// TODO: error handling
-
-const $ = promisify(execFile);
+//   (bundle yt-dlp binary?)
+//   (bundle ffmpeg wasm?)
 
 export class RpcHandler {
 	constructor(private window: BrowserWindow) {}
@@ -110,4 +107,33 @@ function createTempDirectory() {
 			fs.rmSync(dir, { recursive: true, force: true });
 		},
 	};
+}
+
+async function $(file: string, args: string[]) {
+	const output = fs.createWriteStream(
+		path.join(app.getPath("logs"), "main.log"),
+		{ autoClose: false, flags: "a" },
+	);
+	using _ = { [Symbol.dispose]: () => output.close() };
+	const proc = spawn(file, args);
+	proc.stdout.pipe(output);
+	proc.stderr.pipe(output);
+	await new Promise<void>((resolve, reject) => {
+		proc.on("error", (error) => {
+			reject(makeError(error));
+		});
+		proc.on("exit", (code) => {
+			if (code === 0) {
+				resolve();
+			} else {
+				reject(makeError({ code }));
+			}
+		});
+	});
+
+	function makeError(cause: unknown) {
+		return new Error(`Child process falure: ${[file, ...args].join(" ")}`, {
+			cause,
+		});
+	}
 }

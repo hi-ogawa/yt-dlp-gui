@@ -2,13 +2,33 @@ import assert from "node:assert";
 import { createServer } from "node:http";
 import path from "node:path";
 import { exposeTinyRpc } from "@hiogawa/tiny-rpc";
-import { BrowserWindow, app, ipcMain } from "electron";
+import { BrowserWindow, Menu, MenuItem, app, ipcMain, shell } from "electron";
 import sirv from "sirv";
 import { RpcHandler } from "./rpc/server";
 import { rpcServerAdapter } from "./rpc/utils";
 
 async function main() {
 	await app.whenReady();
+
+	// menu
+	let menu = Menu.getApplicationMenu();
+	if (!menu) {
+		menu = Menu.buildFromTemplate([]);
+		Menu.setApplicationMenu(menu);
+	}
+	menu.append(
+		new MenuItem({
+			label: "Logs",
+			submenu: [
+				{
+					label: "main",
+					async click() {
+						await shell.openPath(path.join(app.getPath("logs"), "main.log"));
+					},
+				},
+			],
+		}),
+	);
 
 	// setup window
 	const window = new BrowserWindow({
