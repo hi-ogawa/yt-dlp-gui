@@ -29,10 +29,14 @@ export class RpcHandler {
 		endTime: string;
 	}) {
 		// download webm audio and thumbnail via yt-dlp
-		const tempDir = app.getPath("temp");
-		const tmpFile1 = path.join(tempDir, "yt-dlp-gui-tmp.webm");
-		const tmpFile2 = path.join(tempDir, "yt-dlp-gui-tmp.opus");
-		const thumbnailFile = path.join(tempDir, "yt-dlp-gui-tmp.jpg");
+		const tmpDir = path.join(
+			app.getPath("temp"),
+			`yt-dlp-gui-${Math.random().toString(36).slice(2)}`,
+		);
+		using _ = setupTempDirectory(tmpDir);
+		const tmpFile1 = path.join(tmpDir, "tmp.webm");
+		const tmpFile2 = path.join(tmpDir, "tmp.opus");
+		const thumbnailFile = path.join(tmpDir, "tmp.jpg");
 		await $("yt-dlp", [
 			data.id,
 			"--no-playlist",
@@ -84,4 +88,13 @@ export class RpcHandler {
 		}
 		return false;
 	}
+}
+
+function setupTempDirectory(dir: string) {
+	fs.mkdirSync(dir, { recursive: true });
+	return {
+		[Symbol.dispose]: () => {
+			fs.rmSync(dir, { recursive: true, force: true });
+		},
+	};
 }
