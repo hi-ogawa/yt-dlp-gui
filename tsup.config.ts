@@ -13,7 +13,9 @@ export default defineConfig({
 		"import.meta.env.DEV": JSON.stringify(dev),
 	},
 	esbuildOptions: (options) => {
-		options.target = "es2022";
+		options.supported = {
+			using: false,
+		};
 	},
 	plugins: [
 		{
