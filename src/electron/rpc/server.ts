@@ -60,14 +60,15 @@ export class RpcHandler {
 		const thumbnailDataFlac = flacPicture.encode(thumbnailData);
 
 		// write ffmetadata file
+		// https://ffmpeg.org/ffmpeg-formats.html#metadata
+		const escapeValue = (s: string) => s.replace(/[=;#\\\n]/g, (c) => `\\${c}`);
 		const { artist, title, album, startTime, endTime } = data;
 		const metadataFileContent = [
 			`;FFMETADATA1`,
-			// TODO: escape
-			title && `title=${title}`,
-			artist && `artist=${artist}`,
-			album && `album=${album}`,
-			`METADATA_BLOCK_PICTURE=${thumbnailDataFlac}`,
+			title && `title=${escapeValue(title)}`,
+			artist && `artist=${escapeValue(artist)}`,
+			album && `album=${escapeValue(album)}`,
+			`METADATA_BLOCK_PICTURE=${escapeValue(thumbnailDataFlac)}`,
 		]
 			.filter(Boolean)
 			.map((line) => line + "\n")
