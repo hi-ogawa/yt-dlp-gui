@@ -40,6 +40,7 @@ export class RpcHandler {
 		const tmpFile1 = dir.join("tmp.webm");
 		const tmpFile2 = dir.join("tmp.opus");
 		const thumbnailFile = dir.join("tmp.jpg");
+		const metadataFile = dir.join("ffmetadata.txt");
 
 		// download webm audio and thumbnail via yt-dlp
 		await $("yt-dlp", [
@@ -58,20 +59,33 @@ export class RpcHandler {
 		const thumbnailData = await fs.promises.readFile(thumbnailFile);
 		const thumbnailDataFlac = flacPicture.encode(thumbnailData);
 
-		// convert webm to opus with metadata
+		// write ffmetadata file
 		const { artist, title, album, startTime, endTime } = data;
+		const metadataFileContent = [
+			`;FFMETADATA1`,
+			// TODO: escape
+			title && `title=${title}`,
+			artist && `artist=${artist}`,
+			album && `album=${album}`,
+			`METADATA_BLOCK_PICTURE=${thumbnailDataFlac}`,
+		]
+			.filter(Boolean)
+			.map((line) => line + "\n")
+			.join("");
+		await fs.promises.writeFile(metadataFile, metadataFileContent);
+
+		// convert webm to opus with metadata
 		await $(
 			"ffmpeg",
 			[
 				"-hide_banner",
 				"-y",
 				["-i", tmpFile1],
-				title && ["-metadata", `title=${title}`],
-				artist && ["-metadata", `artist=${artist}`],
-				album && ["-metadata", `album=${album}`],
+				["-i", metadataFile],
+				["-map_metadata", "1"],
+				["-codec", "copy"],
 				startTime && ["-ss", startTime],
 				endTime && ["-to", endTime],
-				["-metadata", `METADATA_BLOCK_PICTURE=${thumbnailDataFlac}`],
 				tmpFile2,
 			]
 				.flat()
