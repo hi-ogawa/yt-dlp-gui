@@ -13,7 +13,7 @@ export class RpcHandler {
 	constructor(private window: BrowserWindow) {}
 
 	async getVideoInfo(input: string) {
-		const id = parseVideoId(input)
+		const id = parseVideoId(input);
 		const result = await fetchVideoMetadata(id);
 		if (result.playabilityStatus.status !== "OK") {
 			throw new Error("Invalid Video URL");

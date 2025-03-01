@@ -52,26 +52,28 @@ interface VideoFormatInfo {
 }
 
 export function parseVideoId(value: string): string {
-  if (value.length === 11) {
-    return value;
-  }
-  if (value.match(/youtube\.com|youtu\.be/)) {
-    try {
-      const url = new URL(value);
-      if (url.hostname === "youtu.be") {
-        return url.pathname.substring(1);
-      } else {
-        const videoId = url.searchParams.get("v");
-        if (videoId) {
-          return videoId;
-        }
-      }
-    } catch {}
-  }
-  throw new Error("Invalid Video URL");
+	if (value.length === 11) {
+		return value;
+	}
+	if (value.match(/youtube\.com|youtu\.be/)) {
+		try {
+			const url = new URL(value);
+			if (url.hostname === "youtu.be") {
+				return url.pathname.substring(1);
+			} else {
+				const videoId = url.searchParams.get("v");
+				if (videoId) {
+					return videoId;
+				}
+			}
+		} catch {}
+	}
+	throw new Error("Invalid Video URL");
 }
 
-export async function fetchVideoMetadata(videoId: string): Promise<VideoMetadata> {
+export async function fetchVideoMetadata(
+	videoId: string,
+): Promise<VideoMetadata> {
 	const res = await fetch("https://www.youtube.com/youtubei/v1/player", {
 		method: "POST",
 		body: JSON.stringify({

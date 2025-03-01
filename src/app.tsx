@@ -2,10 +2,10 @@ import { createTinyForm } from "@hiogawa/tiny-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
 import { rpc } from "./electron/rpc/client";
-import type { VideoMetadata } from "./electron/rpc/server";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
 import { toast } from "./utils/toast";
 import {
+	type VideoMetadata,
 	type YoutubePlayer,
 	loadYoutubePlayer,
 } from "./utils/youtube";
