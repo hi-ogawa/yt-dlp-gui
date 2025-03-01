@@ -5,9 +5,8 @@ import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
 import { fetchVideoMetadata, parseVideoId } from "../../utils/youtube";
 
-// TODO: verify yt-dlp, ffmpeg is installed
-//   (bundle yt-dlp binary?)
-//   (bundle ffmpeg wasm?)
+// TODO
+// verify ffmpeg is installed (or maybe bundle ffmpeg wasm)
 
 export class RpcHandler {
 	constructor(private window: BrowserWindow) {}
