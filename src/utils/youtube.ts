@@ -126,14 +126,15 @@ export interface VideoMetadata {
 		status: string;
 		playableInEmbed: boolean;
 	};
-	captions?: {
-		playerCaptionsTracklistRenderer: {
-			captionTracks: {
-				baseUrl: string;
-				vssId: string;
-				languageCode: string;
-				kind?: string;
-			}[];
-		};
+	streamingData: {
+		adaptiveFormats: {
+			itag: number;
+			url: string;
+			mimeType: string;
+			width?: number;
+			height?: number;
+			contentLength?: number;
+			bitrate: number;
+		}[];
 	};
 }

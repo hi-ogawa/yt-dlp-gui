@@ -1,6 +1,8 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { Readable } from "node:stream";
+import { sortBy } from "@hiogawa/utils";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
 import { fetchVideoMetadata, parseVideoId } from "../../utils/youtube";
@@ -28,27 +30,49 @@ export class RpcHandler {
 		startTime: string;
 		endTime: string;
 	}) {
+		const result = await fetchVideoMetadata(data.id);
+		if (result.playabilityStatus.status !== "OK") {
+			throw new Error("Invalid Video URL");
+		}
+
+		const formats = sortBy(
+			result.streamingData.adaptiveFormats.filter((format) =>
+				format.mimeType.includes("audio/webm"),
+			),
+			(format) => -format.bitrate,
+		);
+		const format = formats[0];
+		if (!format) {
+			throw new Error("Audio data not available");
+		}
+
 		using dir = createTempDirectory();
 		const tmpFile1 = dir.join("tmp.webm");
 		const tmpFile2 = dir.join("tmp.opus");
-		const thumbnailFile = dir.join("tmp.jpg");
 		const metadataFile = dir.join("ffmetadata.txt");
 
-		// download webm audio and thumbnail via yt-dlp
-		await $("yt-dlp", [
-			data.id,
-			"--no-playlist",
-			"-f",
-			"ba[ext=webm]",
-			"-o",
+		// download webm audio
+		// TODO: too slow unless split into range requests
+		console.log("downloading...", format.url);
+		const audioResponse = await fetch(format.url);
+		if (!audioResponse.ok || !audioResponse.body) {
+			throw new Error("Failed to download audio data");
+		}
+		await fs.promises.writeFile(
 			tmpFile1,
-			"--write-thumbnail",
-			"--convert-thumbnails",
-			"jpg",
-		]);
+			Readable.fromWeb(audioResponse.body as any),
+		);
+
+		// download thumbnail
+		const thumbnailUrl = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
+		console.log("downloading...", thumbnailUrl);
+		const thumbnailResponse = await fetch(thumbnailUrl);
+		if (!thumbnailResponse.ok || !thumbnailResponse.body) {
+			throw new Error("Failed to download thumbnail");
+		}
 
 		// process thumbnail data
-		const thumbnailData = await fs.promises.readFile(thumbnailFile);
+		const thumbnailData = await thumbnailResponse.bytes();
 		const thumbnailDataFlac = flacPicture.encode(thumbnailData);
 
 		// write ffmetadata file
