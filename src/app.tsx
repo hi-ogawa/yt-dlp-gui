@@ -2,10 +2,10 @@ import { createTinyForm } from "@hiogawa/tiny-form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import React from "react";
 import { rpc } from "./electron/rpc/client";
+import type { VideoMetadata } from "./electron/rpc/server";
 import { formatTimestamp, parseTimestamp } from "./utils/time";
 import { toast } from "./utils/toast";
 import {
-	type VideoInfo,
 	type YoutubePlayer,
 	loadYoutubePlayer,
 } from "./utils/youtube";
@@ -46,11 +46,11 @@ export function App() {
 	);
 }
 
-function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
+function DownloadForm({ videoInfo }: { videoInfo: VideoMetadata }) {
 	const form = createTinyForm(
 		React.useState({
-			title: videoInfo.title,
-			artist: videoInfo.channel,
+			title: videoInfo.videoDetails.title,
+			artist: videoInfo.videoDetails.author,
 			album: "",
 			startTime: "",
 			endTime: "",
@@ -61,7 +61,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 	const downloadMutation = useMutation({
 		mutationFn: async () => {
 			const saved = await rpc.download({
-				id: videoInfo.id,
+				id: videoInfo.videoDetails.videoId,
 				...form.data,
 			});
 			if (saved) {
@@ -86,7 +86,7 @@ function DownloadForm({ videoInfo }: { videoInfo: VideoInfo }) {
 						(async () => {
 							try {
 								const player = await loadYoutubePlayer(el!, {
-									videoId: videoInfo.id,
+									videoId: videoInfo.videoDetails.videoId,
 								});
 								setPlayer(player);
 							} catch (e) {

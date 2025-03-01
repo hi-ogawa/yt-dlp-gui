@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
-import type { VideoInfo } from "../../utils/youtube";
+import { fetchVideoMetadata, parseVideoId } from "../../utils/youtube";
 
 // TODO: verify yt-dlp, ffmpeg is installed
 //   (bundle yt-dlp binary?)
@@ -12,20 +12,13 @@ import type { VideoInfo } from "../../utils/youtube";
 export class RpcHandler {
 	constructor(private window: BrowserWindow) {}
 
-	async getVideoInfo(id: string) {
-		using dir = createTempDirectory();
-		const outfileArg = dir.join("tmp");
-		const outfile = dir.join("tmp.info.json");
-		await $("yt-dlp", [
-			id,
-			"--no-playlist",
-			"--skip-download",
-			"--write-info-json",
-			"-o",
-			outfileArg,
-		]);
-		const data = await fs.promises.readFile(outfile, "utf-8");
-		return JSON.parse(data) as VideoInfo;
+	async getVideoInfo(input: string) {
+		const id = parseVideoId(input)
+		const result = await fetchVideoMetadata(id);
+		if (result.playabilityStatus.status !== "OK") {
+			throw new Error("Invalid Video URL");
+		}
+		return result;
 	}
 
 	async download(data: {
