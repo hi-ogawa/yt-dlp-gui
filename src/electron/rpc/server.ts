@@ -1,31 +1,25 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { sortBy } from "@hiogawa/utils";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
-import type { VideoInfo } from "../../utils/youtube";
+import {
+	fetchByRanges,
+	fetchVideoMetadata,
+	parseVideoId,
+} from "../../utils/youtube";
 
-// TODO: verify yt-dlp, ffmpeg is installed
-//   (bundle yt-dlp binary?)
-//   (bundle ffmpeg wasm?)
+// TODO
+// verify ffmpeg is installed (or maybe bundle ffmpeg wasm)
 
 export class RpcHandler {
 	constructor(private window: BrowserWindow) {}
 
-	async getVideoInfo(id: string) {
-		using dir = createTempDirectory();
-		const outfileArg = dir.join("tmp");
-		const outfile = dir.join("tmp.info.json");
-		await $("yt-dlp", [
-			id,
-			"--no-playlist",
-			"--skip-download",
-			"--write-info-json",
-			"-o",
-			outfileArg,
-		]);
-		const data = await fs.promises.readFile(outfile, "utf-8");
-		return JSON.parse(data) as VideoInfo;
+	async getVideoInfo(input: string) {
+		const id = parseVideoId(input);
+		const result = await fetchVideoMetadata(id);
+		return result;
 	}
 
 	async download(data: {
@@ -36,27 +30,40 @@ export class RpcHandler {
 		startTime: string;
 		endTime: string;
 	}) {
+		const result = await fetchVideoMetadata(data.id);
+
+		const formats = sortBy(
+			result.streamingData.adaptiveFormats.filter((format) =>
+				format.mimeType.includes("audio/webm"),
+			),
+			(format) => -format.bitrate,
+		);
+		const format = formats[0];
+		if (!format) {
+			throw new Error("Audio data not available");
+		}
+
 		using dir = createTempDirectory();
 		const tmpFile1 = dir.join("tmp.webm");
 		const tmpFile2 = dir.join("tmp.opus");
-		const thumbnailFile = dir.join("tmp.jpg");
 		const metadataFile = dir.join("ffmetadata.txt");
 
-		// download webm audio and thumbnail via yt-dlp
-		await $("yt-dlp", [
-			data.id,
-			"--no-playlist",
-			"-f",
-			"ba[ext=webm]",
-			"-o",
+		// download webm audio
+		await fs.promises.writeFile(
 			tmpFile1,
-			"--write-thumbnail",
-			"--convert-thumbnails",
-			"jpg",
-		]);
+			// use range request to avoid throttling
+			fetchByRanges(format.url, format.contentLength, 2 ** 20),
+		);
+
+		// download thumbnail
+		const thumbnailUrl = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
+		const thumbnailResponse = await fetch(thumbnailUrl);
+		if (!thumbnailResponse.ok || !thumbnailResponse.body) {
+			throw new Error("Failed to download thumbnail");
+		}
 
 		// process thumbnail data
-		const thumbnailData = await fs.promises.readFile(thumbnailFile);
+		const thumbnailData = await thumbnailResponse.bytes();
 		const thumbnailDataFlac = flacPicture.encode(thumbnailData);
 
 		// write ffmetadata file
