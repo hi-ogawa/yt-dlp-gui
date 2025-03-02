@@ -16,9 +16,6 @@ export class RpcHandler {
 	async getVideoInfo(input: string) {
 		const id = parseVideoId(input);
 		const result = await fetchVideoMetadata(id);
-		if (result.playabilityStatus.status !== "OK") {
-			throw new Error("Invalid Video URL");
-		}
 		return result;
 	}
 
@@ -31,9 +28,6 @@ export class RpcHandler {
 		endTime: string;
 	}) {
 		const result = await fetchVideoMetadata(data.id);
-		if (result.playabilityStatus.status !== "OK") {
-			throw new Error("Invalid Video URL");
-		}
 
 		const formats = sortBy(
 			result.streamingData.adaptiveFormats.filter((format) =>
@@ -52,9 +46,12 @@ export class RpcHandler {
 		const metadataFile = dir.join("ffmetadata.txt");
 
 		// download webm audio
-		// TODO: too slow unless split into range requests
-		console.log("downloading...", format.url);
-		const audioResponse = await fetch(format.url);
+		const audioResponse = await fetch(format.url, {
+			headers: {
+				// it looks like adding this trivial range header can make download a way faster
+				range: `bytes=0-`,
+			},
+		});
 		if (!audioResponse.ok || !audioResponse.body) {
 			throw new Error("Failed to download audio data");
 		}
@@ -65,7 +62,6 @@ export class RpcHandler {
 
 		// download thumbnail
 		const thumbnailUrl = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
-		console.log("downloading...", thumbnailUrl);
 		const thumbnailResponse = await fetch(thumbnailUrl);
 		if (!thumbnailResponse.ok || !thumbnailResponse.body) {
 			throw new Error("Failed to download thumbnail");

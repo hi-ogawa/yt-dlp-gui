@@ -112,7 +112,13 @@ export async function fetchVideoMetadata(
 			"X-Goog-Visitor-Id": "CgtwU3N6UXVjakdWbyi94bi7BjIKCgJKUBIEGgAgUQ%3D%3D",
 		},
 	});
-	return await res.json();
+	if (res.ok) {
+		const result: VideoMetadata = await res.json();
+		if (result.playabilityStatus.status === "OK") {
+			return result;
+		}
+	}
+	throw new Error("Invalid Video URL");
 }
 
 export interface VideoMetadata {
@@ -133,7 +139,7 @@ export interface VideoMetadata {
 			mimeType: string;
 			width?: number;
 			height?: number;
-			contentLength?: number;
+			contentLength: number;
 			bitrate: number;
 		}[];
 	};
