@@ -76,6 +76,8 @@ export async function fetchVideoMetadata(
 ): Promise<VideoMetadata> {
 	const res = await fetch("https://www.youtube.com/youtubei/v1/player", {
 		method: "POST",
+		// based on
+		// https://github.com/yt-dlp/yt-dlp/blob/79ec2fdff75c8c1bb89b550266849ad4dec48dd3/yt_dlp/extractor/youtube.py#L211
 		body: JSON.stringify({
 			videoId,
 			context: {
