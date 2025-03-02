@@ -5,7 +5,11 @@ import { Readable } from "node:stream";
 import { sortBy } from "@hiogawa/utils";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
-import { fetchVideoMetadata, parseVideoId } from "../../utils/youtube";
+import {
+	fetchByRanges,
+	fetchVideoMetadata,
+	parseVideoId,
+} from "../../utils/youtube";
 
 // TODO
 // verify ffmpeg is installed (or maybe bundle ffmpeg wasm)
@@ -46,18 +50,10 @@ export class RpcHandler {
 		const metadataFile = dir.join("ffmetadata.txt");
 
 		// download webm audio
-		const audioResponse = await fetch(format.url, {
-			headers: {
-				// it looks like adding this trivial range header can make download a way faster
-				range: `bytes=0-`,
-			},
-		});
-		if (!audioResponse.ok || !audioResponse.body) {
-			throw new Error("Failed to download audio data");
-		}
 		await fs.promises.writeFile(
 			tmpFile1,
-			Readable.fromWeb(audioResponse.body as any),
+			// use range request to avoid throttling
+			fetchByRanges(format.url, format.contentLength, 2 ** 20),
 		);
 
 		// download thumbnail

@@ -146,3 +146,34 @@ export interface VideoMetadata {
 		}[];
 	};
 }
+
+export function fetchByRanges(
+	url: string,
+	totalSize: number,
+	chunkSize: number,
+): ReadableStream<Uint8Array> {
+	const numChunks = Math.ceil(totalSize / chunkSize);
+	return new ReadableStream({
+		async start(controller) {
+			for (let i = 0; i < numChunks; i++) {
+				const start = i * chunkSize;
+				const end = Math.min(totalSize, (i + 1) * chunkSize) - 1;
+				const range = `bytes=${start}-${end}`;
+				const response = await fetch(url, {
+					headers: {
+						range,
+					},
+				});
+				if (!response.ok || !response.body) {
+					throw new Error(
+						`Fetch range failed (status: ${response.status}, range: ${range})`,
+					);
+				}
+				for await (const data of response.body) {
+					controller.enqueue(data);
+				}
+			}
+			controller.close();
+		},
+	});
+}
