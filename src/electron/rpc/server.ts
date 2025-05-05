@@ -104,7 +104,10 @@ export class RpcHandler {
 		const defaultFilename =
 			([artist, album, title].filter(Boolean).join(" - ") || "download") +
 			".opus";
-		const defaultOutputPath = path.join(downloadDir, defaultFilename);
+		const defaultOutputPath = path.join(
+			downloadDir,
+			defaultFilename.replace(/[/\\]/g, "_"),
+		);
 
 		const dialogResult = await dialog.showSaveDialog(this.window, {
 			defaultPath: defaultOutputPath,
