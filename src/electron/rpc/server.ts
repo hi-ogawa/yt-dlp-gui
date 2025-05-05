@@ -106,7 +106,7 @@ export class RpcHandler {
 			".opus";
 		const defaultOutputPath = path.join(
 			downloadDir,
-			defaultFilename.replace(/[:<>?*|"]/g, "_"),
+			defaultFilename.replace(/[/\:]/g, "_"),
 		);
 
 		const dialogResult = await dialog.showSaveDialog(this.window, {
