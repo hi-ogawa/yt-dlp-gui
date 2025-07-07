@@ -116,6 +116,7 @@ export async function fetchVideoMetadata(
 	});
 	if (res.ok) {
 		const result: VideoMetadata = await res.json();
+		console.log(result)
 		if (result.playabilityStatus.status === "OK") {
 			return result;
 		}
