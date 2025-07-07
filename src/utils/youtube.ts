@@ -77,19 +77,19 @@ export async function fetchVideoMetadata(
 	const res = await fetch("https://www.youtube.com/youtubei/v1/player", {
 		method: "POST",
 		// based on
-		// https://github.com/yt-dlp/yt-dlp/blob/79ec2fdff75c8c1bb89b550266849ad4dec48dd3/yt_dlp/extractor/youtube.py#L211
+		// https://github.com/yt-dlp/yt-dlp/blob/a7113722ec33f30fc898caee9242af2b82188a53/yt_dlp/extractor/youtube/_base.py#L42
 		body: JSON.stringify({
 			videoId,
 			context: {
 				client: {
 					clientName: "IOS",
-					clientVersion: "19.45.4",
+					clientVersion: "20.10.4",
 					deviceMake: "Apple",
 					deviceModel: "iPhone16,2",
 					userAgent:
-						"com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)",
+						"com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
 					osName: "iPhone",
-					osVersion: "18.1.0.22B83",
+					osVersion: "18.3.2.22D82",
 					hl: "en",
 					timeZokne: "UTC",
 					utcOffsetMinutes: 0,
@@ -106,12 +106,12 @@ export async function fetchVideoMetadata(
 		}),
 		headers: {
 			"X-YouTube-Client-Name": "5",
-			"X-YouTube-Client-Version": "19.45.4",
+			"X-YouTube-Client-Version": "20.10.4",
 			Origin: "https://www.youtube.com",
 			"User-Agent":
-				"com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)",
+				"com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
 			"content-type": "application/json",
-			"X-Goog-Visitor-Id": "CgtwU3N6UXVjakdWbyi94bi7BjIKCgJKUBIEGgAgUQ%3D%3D",
+			"X-Goog-Visitor-Id": "Cgs2M2VzRWN2OEZlZyjdoa3DBjIKCgJKUBIEGgAgWQ%3D%3D",
 		},
 	});
 	if (res.ok) {
