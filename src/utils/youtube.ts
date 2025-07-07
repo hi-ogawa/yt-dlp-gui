@@ -111,6 +111,9 @@ export async function fetchVideoMetadata(
 			"User-Agent":
 				"com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
 			"content-type": "application/json",
+			// obtained by putting `print(headers)` here and running yt-dlp locally
+			//   python -m yt_dlp https://www.youtube.com/watch?v=_1juftZumOQ -F
+			// https://github.com/yt-dlp/yt-dlp/blob/a7113722ec33f30fc898caee9242af2b82188a53/yt_dlp/extractor/youtube/_base.py#L772-L785
 			"X-Goog-Visitor-Id": "Cgs2M2VzRWN2OEZlZyjdoa3DBjIKCgJKUBIEGgAgWQ%3D%3D",
 		},
 	});
