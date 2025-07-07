@@ -74,6 +74,7 @@ export function parseVideoId(value: string): string {
 export async function fetchVideoMetadata(
 	videoId: string,
 ): Promise<VideoMetadata> {
+	const visitor_data = await getVisitorData(videoId);
 	const res = await fetch("https://www.youtube.com/youtubei/v1/player", {
 		method: "POST",
 		// based on
@@ -111,10 +112,7 @@ export async function fetchVideoMetadata(
 			"User-Agent":
 				"com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
 			"content-type": "application/json",
-			// obtained by putting `print(headers)` here and running yt-dlp locally
-			//   python -m yt_dlp https://www.youtube.com/watch?v=_1juftZumOQ -F
-			// https://github.com/yt-dlp/yt-dlp/blob/a7113722ec33f30fc898caee9242af2b82188a53/yt_dlp/extractor/youtube/_base.py#L772-L785
-			"X-Goog-Visitor-Id": "Cgs2M2VzRWN2OEZlZyjdoa3DBjIKCgJKUBIEGgAgWQ%3D%3D",
+			"X-Goog-Visitor-Id": visitor_data,
 		},
 	});
 	if (res.ok) {
@@ -125,6 +123,42 @@ export async function fetchVideoMetadata(
 		console.error(result);
 	}
 	throw new Error("Invalid Video URL");
+}
+
+async function getVisitorData(videoId: string) {
+	// Ported by copilot
+	// https://github.com/yt-dlp/yt-dlp/blob/a7113722ec33f30fc898caee9242af2b82188a53/yt_dlp/extractor/youtube/_base.py#L739-L745
+	function extract_visitor_data(ytcfg: any): string | undefined {
+		if (ytcfg && ytcfg.VISITOR_DATA) {
+			return ytcfg.VISITOR_DATA;
+		}
+		if (ytcfg && ytcfg.INNERTUBE_CONTEXT && ytcfg.INNERTUBE_CONTEXT.client) {
+			return ytcfg.INNERTUBE_CONTEXT.client.visitorData;
+		}
+		if (ytcfg && ytcfg.responseContext && ytcfg.responseContext.visitorData) {
+			return ytcfg.responseContext.visitorData;
+		}
+	}
+
+	function extract_ytcfg(webpage: string): Record<string, any> {
+		const match = webpage.match(/ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;/);
+		if (match) {
+			return JSON.parse(match[1]);
+		}
+		throw new Error("ytcfg not found in webpage");
+	}
+
+	const res = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
+	if (!res.ok) {
+		throw new Error("Failed to fetch YouTube page");
+	}
+	const webpage = await res.text();
+	const ytcfg = extract_ytcfg(webpage);
+	const visitorData = extract_visitor_data(ytcfg);
+	if (!visitorData) {
+		throw new Error("Visitor data not found in ytcfg");
+	}
+	return visitorData;
 }
 
 export interface VideoMetadata {
