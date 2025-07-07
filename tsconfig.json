@@ -4,6 +4,7 @@
 		"types": ["vite/client"],
 		"jsx": "react-jsx",
 		"strict": true,
+		"allowImportingTsExtensions": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noImplicitOverride": true,
