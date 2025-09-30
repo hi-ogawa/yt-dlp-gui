@@ -4,10 +4,7 @@ import path from "node:path";
 import { sortBy } from "@hiogawa/utils";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
-import {
-	fetchVideoMetadata,
-	parseVideoId,
-} from "../../utils/youtube";
+import { fetchVideoMetadata, parseVideoId } from "../../utils/youtube";
 
 // TODO
 // verify ffmpeg is installed (or maybe bundle ffmpeg wasm)
