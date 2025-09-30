@@ -4,11 +4,7 @@ import path from "node:path";
 import { sortBy } from "@hiogawa/utils";
 import { BrowserWindow, app, dialog } from "electron";
 import * as flacPicture from "../../flac-picture";
-import {
-	fetchByRanges,
-	fetchVideoMetadata,
-	parseVideoId,
-} from "../../utils/youtube";
+import { fetchVideoMetadata, parseVideoId } from "../../utils/youtube";
 
 // TODO
 // verify ffmpeg is installed (or maybe bundle ffmpeg wasm)
@@ -49,11 +45,15 @@ export class RpcHandler {
 		const metadataFile = dir.join("ffmetadata.txt");
 
 		// download webm audio
-		await fs.promises.writeFile(
+		// (need yt-dlp as restriction becomes harder)
+		// https://github.com/yt-dlp/yt-dlp/issues/14404#issuecomment-3330980464
+		await $("yt-dlp", [
+			"-f",
+			"ba[ext=webm]",
+			"-o",
 			tmpFile1,
-			// use range request to avoid throttling
-			fetchByRanges(format.url, format.contentLength, 2 ** 20),
-		);
+			`https://www.youtube.com/watch?v=${data.id}`,
+		]);
 
 		// download thumbnail
 		const thumbnailUrl = `https://i.ytimg.com/vi/${data.id}/hqdefault.jpg`;
